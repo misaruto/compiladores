@@ -1,0 +1,68 @@
+import java_cup.runtime.*;
+
+/* TERMINAIS */
+terminal PTVIRG, MAIS, MENOS, DIV, MULT, MOD, PTO, IDENT;
+terminal ABRE_PARENT, FECHA_PARENT, ABRE_COLCH, FECHA_COLCH, KW_IF;
+terminal Double NUMBER;
+
+/* NÃO TERMINAIS */
+non terminal expr_list, expr_ptv;
+non terminal Double expr, term, factor, designator;
+parser code{:
+  int contador = 0;
+  double somatorio = 0.0;
+
+  public void imprimeRelatorio(){
+    System.out.println("Foram reconhecidas e computadas:");
+    System.out.println(parser.contador + " expressões");
+    System.out.println("Cujo somatório foi:" + parser.somatorio);
+  } 
+:}
+
+expr_list ::= expr_list expr_ptv {:
+    parser.contador++;
+    parser.somatorio += e.doubleValue();
+  :}; |  expr_ptv {:
+    parser.contador++;
+    parser.somatorio += e.doubleValue();
+  :};
+
+expr_ptv ::= expr:e {: System.out.println("= " + e); :} PTVIRG;
+
+expr ::= expr:e MAIS term:t {:
+    RESULT = e + t; 
+  :} | expr:e MENOS term:t {:
+    RESULT = e - t;
+  :} | MENOS term:t {:
+    RESULT = -t;
+  :} | term:t {:
+    RESULT = new Double(t.doubleValue());
+  :} ;
+
+term ::= factor:f MULT term:t {: 
+    RESULT = f * t;  
+  :} | factor:f DIV term:t {: 
+    RESULT = f / t;  
+  :} | factor:f {:
+    RESULT = new Double(f.doubleValue());
+  :};
+
+factor ::= NUMBER:n {: 
+    RESULT = new Double(n.doubleValue());
+  :} | ABRE_PARENT expr:e FECHA_PARENT {:
+    RESULT = new Double(e.doubleValue());
+  :} | designator:d {:
+    RESULT = new Double(d.doubleValue());
+  :} ;
+
+designator ::= designator ABRE_COLCH expr:e FECHA_COLCH {:
+    if(e < 0){
+      System.out.println("Erro: índice negativo");
+      
+    }
+    RESULT = new Double(1.0);
+  :} | designator PTO IDENT {:
+    RESULT = new Double(1.0);
+  :} | IDENT:id {:
+    RESULT = new Double(1.0);
+  :};
