@@ -1,13 +1,13 @@
 import java_cup.runtime.*;
 
 /* TERMINAIS */
-terminal PTVIRG, MAIS, MENOS, DIV, MULT, MOD, IDENT;
-terminal ABRE_PARENT, FECHA_PARENT, KW_IF;
+terminal PTVIRG, MAIS, MENOS, DIV, MULT, MOD, PTO, IDENT;
+terminal ABRE_PARENT, FECHA_PARENT, ABRE_COLCH, FECHA_COLCH, KW_IF;
 terminal Double NUMBER;
 
 /* NÃO TERMINAIS */
 non terminal expr_list, expr_ptv;
-non terminal Double expr, term, factor;
+non terminal Double expr, term, factor, designator;
 
 
 expr_list ::= expr_list expr_ptv |  expr_ptv;
@@ -27,7 +27,7 @@ expr ::= expr:e MAIS term:t {:
 term ::= factor:f MULT term:t {: 
     RESULT = f * t;  
   :} | factor:f DIV term:t {: 
-  RESULT = f / t;  
+    RESULT = f / t;  
   :} | factor:f {:
     RESULT = new Double(f.doubleValue());
   :};
@@ -41,13 +41,13 @@ factor ::= NUMBER:n {:
   :} ;
 
 designator ::= designator ABRE_COLCH expr:e FECHA_COLCH {:
-    if(e<0){
+    if(e < 0){
       System.out.println("Erro: índice negativo");
-      System.exit(1);
+      
     }
     RESULT = new Double(1.0);
   :} | designator PTO IDENT {:
     RESULT = new Double(1.0);
   :} | IDENT:id {:
-  RESULT = new Double(1.0);
+    RESULT = new Double(1.0);
   :};

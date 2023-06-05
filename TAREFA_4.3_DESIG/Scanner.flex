@@ -41,10 +41,12 @@ espaco = {fimdeLinha} | [ \t\f]
 ";" { return new Symbol(sym.PTVIRG);}
 "(" { return new Symbol(sym.ABRE_PARENT);}
 ")" { return new Symbol(sym.FECHA_PARENT);}
-
+"[" { return new Symbol(sym.ABRE_COLCH);}
+"]" { return new Symbol(sym.FECHA_COLCH);}
+"." { return new Symbol(sym.PTO);}
 
 {espaco} { /* despreza */ }
 
-.|\n { /* Caractere inválido */     
+\n { /* Caractere inválido */     
   return new Symbol(sym.EOF, yyline, yycolumn, yytext());    
-  }
+}
