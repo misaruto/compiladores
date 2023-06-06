@@ -23,9 +23,9 @@ cd $folder
 javaFiles=`ls *.java`
 for javaFile in $javaFiles
 do
-  javac $javaFile
-  echo "Compiled $javaFile"
+  `javac $javaFile`
 done
+
 echo "Processamento finalizado."
 sleep 1
 cp ../teste.txt ./
