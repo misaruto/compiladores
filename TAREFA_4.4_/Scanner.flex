@@ -33,6 +33,7 @@ espaco = {fimdeLinha} | [ \t\f]
 
 {ident} { return new Symbol(sym.IDENT, yytext());}
 
+"=" { return new Symbol(sym.EQUAL);}
 "+" { return new Symbol(sym.MAIS);}
 "-" { return new Symbol(sym.MENOS);}
 "/" { return new Symbol(sym.DIV);}

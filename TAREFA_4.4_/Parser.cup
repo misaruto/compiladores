@@ -1,13 +1,17 @@
 import java_cup.runtime.*;
 import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
 
 parser code {:
   private Scanner sc = new Scanner(System.in);
   private int contador = 0;
   private double somatorio = 0.0;
+  Map<String,Object> table = new HashMap<>();
   public double getDouble(){
     return this.sc.nextDouble();
   }
+  public boolean inDesig = false; 
   public void update(Object value){
     if (value == null){ 
       return;
@@ -16,6 +20,8 @@ parser code {:
     this.somatorio += Double.parseDouble(value.toString());
   }
   public void imprimeRelatorio(){
+    System.out.println(this.table.toString());
+
     System.out.println("Foram reconhecidas e computadas:");
     System.out.println(this.contador + " expressões");
     System.out.println("Cujo somatório foi: " + this.somatorio);
@@ -23,14 +29,13 @@ parser code {:
 :}
 
 /* TERMINAIS */
-terminal PTVIRG, MAIS, MENOS, DIV, MULT, MOD, PTO, IDENT;
+terminal PTVIRG, MAIS, MENOS, DIV, MULT, MOD, PTO, IDENT,EQUAL;
 terminal ABRE_PARENT, FECHA_PARENT, ABRE_COLCH, FECHA_COLCH, KW_IF;
 terminal Double NUMBER;
 
 /* NÃO TERMINAIS */
 non terminal expr_list, expr_ptv;
-non terminal Double expr, term, factor, designator;
-
+non terminal Object expr, term, factor,designator;
 
 expr_list ::= expr_list expr_ptv:e {:
     parser.update(e);
@@ -38,42 +43,59 @@ expr_list ::= expr_list expr_ptv:e {:
     parser.update(e);
   :};
 
-expr_ptv ::= expr:e {: System.out.println("= " + e); RESULT = e; :} PTVIRG;
+expr_ptv ::= expr:e {: 
+  System.out.println("= " + e); 
+  RESULT = e; 
+  :} PTVIRG;
 
 expr ::= expr:e MAIS term:t {:
-    RESULT = e + t; 
+    RESULT = (double)e + (double)t; 
   :} | expr:e MENOS term:t {:
-    RESULT = e - t;
+    RESULT = (double)e - (double)t;
   :} | MENOS term:t {:
-    RESULT = -t;
-  :} | term:t {:
-    RESULT = new Double(t.doubleValue());
+    RESULT = -1 * (double)t;
+  :}
+  | designator:key EQUAL term:value {:
+    parser.table.put(key.toString(),value);
+  :}
+   | term:t {:
+    RESULT = t;
   :};
 
 term ::= factor:f MULT term:t {: 
-    RESULT = f * t;  
+    RESULT = (double)f * (double)t;  
   :} | factor:f DIV term:t {:
-    double denominador = t.doubleValue();
-    while(denominador == 0.0){
-      System.out.println("O denominador não pode ser zero");
-      System.out.println("Informe o denominador:");
-      denominador = parser.getDouble();
+    Object denominador = t;
+    if(parser.inDesig){
+      while((double)denominador == 0.0){
+        System.out.println("O denominador não pode ser zero");
+        System.out.println("Informe o denominador:");
+        denominador = parser.getDouble();
+      }
     }
-    RESULT = f / denominador;  
+    parser.inDesig = false;
+    RESULT = (double)f / (double)denominador;  
+  :}| factor:f MOD term:t {:
+    Integer denominador = Integer.parseInt(t.toString().split("\\.")[0]);
+    
+    if(denominador.getClass()==Integer.class){
+      RESULT = (double)f / (int)denominador;
+    }
   :} | factor:f {:
-    RESULT = new Double(f.doubleValue());
+    RESULT = f;
   :};
 
 factor ::= NUMBER:n {: 
-    RESULT = new Double(n.doubleValue());
+    RESULT = n;
   :} | ABRE_PARENT expr:e FECHA_PARENT {:
-    RESULT = new Double(e.doubleValue());
+    RESULT = e;
   :} | designator:d {:
-    RESULT = new Double(d.doubleValue());
+    parser.inDesig = true;
+    RESULT = parser.table.get(d);
   :};
 
 designator ::= designator ABRE_COLCH expr:e FECHA_COLCH {:
-    if(e < 0){
+    if((double)e < 0){
       System.out.println("O índice do vetor não negativo");
       double indice = -1;
       
@@ -82,12 +104,16 @@ designator ::= designator ABRE_COLCH expr:e FECHA_COLCH {:
         indice = parser.getDouble();
         System.out.println();
       }while(indice < 0);
-      RESULT = new Double(indice);
+      RESULT = indice;
     }else{
-      RESULT = new Double(e);
+      RESULT = e;
     }
-  :} | designator:e PTO IDENT {:
-    RESULT = new Double(e.doubleValue());
+  :} | designator:e PTO IDENT:id {:
+
+    String key = e.toString() + "." + id.toString();
+    System.out.println("key: " + key);
+    Object s = key;
+    RESULT =s;
   :} | IDENT:id {:
-    RESULT = new Double(1.0);
+      RESULT = id;
   :};

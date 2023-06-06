@@ -9,7 +9,6 @@ class Main {
         //Para ler a entrada do arquivo  
         FileReader in = new FileReader("teste.txt");
         Scanner scanner = new Scanner(in);
-        
         parser parser = new parser(scanner);
         parser.parse();
         parser.imprimeRelatorio();
