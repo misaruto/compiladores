@@ -1,4 +1,5 @@
 import java_cup.runtime.*;
+import java.util.Scanner;
 
 /* TERMINAIS */
 terminal PTVIRG, MAIS, MENOS, DIV, MULT, MOD, PTO, IDENT;
@@ -8,7 +9,8 @@ terminal Double NUMBER;
 /* NÃO TERMINAIS */
 non terminal expr_list, expr_ptv;
 non terminal Double expr, term, factor, designator;
-parser code{:
+
+parser code {:
   int contador = 0;
   double somatorio = 0.0;
 
@@ -16,7 +18,7 @@ parser code{:
     System.out.println("Foram reconhecidas e computadas:");
     System.out.println(parser.contador + " expressões");
     System.out.println("Cujo somatório foi:" + parser.somatorio);
-  } 
+  }
 :}
 
 expr_list ::= expr_list expr_ptv {:
@@ -37,7 +39,7 @@ expr ::= expr:e MAIS term:t {:
     RESULT = -t;
   :} | term:t {:
     RESULT = new Double(t.doubleValue());
-  :} ;
+  :};
 
 term ::= factor:f MULT term:t {: 
     RESULT = f * t;  
@@ -53,14 +55,22 @@ factor ::= NUMBER:n {:
     RESULT = new Double(e.doubleValue());
   :} | designator:d {:
     RESULT = new Double(d.doubleValue());
-  :} ;
+  :};
 
 designator ::= designator ABRE_COLCH expr:e FECHA_COLCH {:
     if(e < 0){
-      System.out.println("Erro: índice negativo");
-      
+      System.out.println("O índice do vetor não negativo");
+      int indice = -1;
+      Scanner sc = new Scanner(System.in);
+      do{
+        System.out.print("Digite um índice válido: ");
+        indice = sc.nextInt();
+        System.out.println();
+      }while(indice < 0);
+      RESULT = new Double(indice);
+    }else{
+      RESULT = new Double(e);
     }
-    RESULT = new Double(1.0);
   :} | designator PTO IDENT {:
     RESULT = new Double(1.0);
   :} | IDENT:id {:
