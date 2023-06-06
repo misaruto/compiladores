@@ -1,4 +1,6 @@
 import java_cup.runtime.*;
+import java.util.Scanner;
+
 
 /* TERMINAIS */
 terminal PTVIRG, MAIS, MENOS, DIV, MULT, MOD, PTO, IDENT;
@@ -42,10 +44,18 @@ factor ::= NUMBER:n {:
 
 designator ::= designator ABRE_COLCH expr:e FECHA_COLCH {:
     if(e < 0){
-      System.out.println("Erro: índice negativo");
-      
+      System.out.println("O índice do vetor não negativo");
+      int indice = -1;
+      Scanner sc = new Scanner(System.in);
+      do{
+        System.out.print("Digite um índice válido: ");
+        indice = sc.nextInt();
+        System.out.println();
+      }while(indice < 0);
+      RESULT = new Double(indice);
+    }else{
+      RESULT = new Double(e);
     }
-    RESULT = new Double(1.0);
   :} | designator PTO IDENT {:
     RESULT = new Double(1.0);
   :} | IDENT:id {:
