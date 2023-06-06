@@ -1,6 +1,27 @@
 import java_cup.runtime.*;
 import java.util.Scanner;
 
+parser code {:
+  private Scanner sc = new Scanner(System.in);
+  private int contador = 0;
+  private double somatorio = 0.0;
+  public double getDouble(){
+    return this.sc.nextDouble();
+  }
+  public void update(Object value){
+    if (value == null){ 
+      return;
+    }
+    this.contador++;
+    this.somatorio += Double.parseDouble(value.toString());
+  }
+  public void imprimeRelatorio(){
+    System.out.println("Foram reconhecidas e computadas:");
+    System.out.println(this.contador + " expressões");
+    System.out.println("Cujo somatório foi: " + this.somatorio);
+  }
+:}
+
 /* TERMINAIS */
 terminal PTVIRG, MAIS, MENOS, DIV, MULT, MOD, PTO, IDENT;
 terminal ABRE_PARENT, FECHA_PARENT, ABRE_COLCH, FECHA_COLCH, KW_IF;
@@ -10,26 +31,14 @@ terminal Double NUMBER;
 non terminal expr_list, expr_ptv;
 non terminal Double expr, term, factor, designator;
 
-parser code {:
-  int contador = 0;
-  double somatorio = 0.0;
 
-  public void imprimeRelatorio(){
-    System.out.println("Foram reconhecidas e computadas:");
-    System.out.println(parser.contador + " expressões");
-    System.out.println("Cujo somatório foi:" + parser.somatorio);
-  }
-:}
-
-expr_list ::= expr_list expr_ptv {:
-    parser.contador++;
-    parser.somatorio += e.doubleValue();
-  :}; |  expr_ptv {:
-    parser.contador++;
-    parser.somatorio += e.doubleValue();
+expr_list ::= expr_list expr_ptv:e {:
+    parser.update(e);
+  :} | expr_ptv:e {:
+    parser.update(e);
   :};
 
-expr_ptv ::= expr:e {: System.out.println("= " + e); :} PTVIRG;
+expr_ptv ::= expr:e {: System.out.println("= " + e); RESULT = e; :} PTVIRG;
 
 expr ::= expr:e MAIS term:t {:
     RESULT = e + t; 
@@ -43,8 +52,14 @@ expr ::= expr:e MAIS term:t {:
 
 term ::= factor:f MULT term:t {: 
     RESULT = f * t;  
-  :} | factor:f DIV term:t {: 
-    RESULT = f / t;  
+  :} | factor:f DIV term:t {:
+    double denominador = t.doubleValue();
+    while(denominador == 0.0){
+      System.out.println("O denominador não pode ser zero");
+      System.out.println("Informe o denominador:");
+      denominador = parser.getDouble();
+    }
+    RESULT = f / denominador;  
   :} | factor:f {:
     RESULT = new Double(f.doubleValue());
   :};
@@ -60,19 +75,19 @@ factor ::= NUMBER:n {:
 designator ::= designator ABRE_COLCH expr:e FECHA_COLCH {:
     if(e < 0){
       System.out.println("O índice do vetor não negativo");
-      int indice = -1;
-      Scanner sc = new Scanner(System.in);
+      double indice = -1;
+      
       do{
         System.out.print("Digite um índice válido: ");
-        indice = sc.nextInt();
+        indice = parser.getDouble();
         System.out.println();
       }while(indice < 0);
       RESULT = new Double(indice);
     }else{
       RESULT = new Double(e);
     }
-  :} | designator PTO IDENT {:
-    RESULT = new Double(1.0);
+  :} | designator:e PTO IDENT {:
+    RESULT = new Double(e.doubleValue());
   :} | IDENT:id {:
     RESULT = new Double(1.0);
   :};
