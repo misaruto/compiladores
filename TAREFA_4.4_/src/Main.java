@@ -11,11 +11,9 @@ class Main {
         Scanner scanner = new Scanner(in);
         
         parser parser = new parser(scanner);
-        try {
-            parser.parse();
-            System.out.println("Arquivo sem erros de sintaxe!");
-        } catch (Exception e) {
-            System.out.println("Erro de sintaxe:" + e);
-        }
+        parser.parse();
+        parser.imprimeRelatorio();
+        System.out.println("Arquivo sem erros de sintaxe!");
+
     }
 }
