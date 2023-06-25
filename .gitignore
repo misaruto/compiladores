@@ -1,4 +1,6 @@
 *.java
 *.class
+!*/src/error/*.java
 !Main.java
 */src/teste.txt
+.idea
