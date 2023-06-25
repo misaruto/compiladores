@@ -1,0 +1,141 @@
+import java_cup.runtime.*;
+import error.ListError;
+
+parser code {:
+  public boolean inDesig = false; 
+  Scanner sc = (Scanner)this.getScanner();
+
+  public void defineError(int line, int column, String message){
+    sc.defineError(line, column, message);
+  }
+  public void defineError(int line, int column){
+    sc.defineError(line, column);
+  }
+  public void defineError(String message){
+    sc.defineError(message);
+  }
+  public void syntax_error(Symbol s){
+    this.defineError(s.left,s.right);
+  }
+  public void print(String message){
+    System.out.println(message);
+  }
+:}
+
+/* TERMINAIS */
+terminal PTVIRG, MAIS, MENOS, DIV, MULT, MOD, PTO, IDENT, EQUAL;
+terminal ABRE_PARENT, FECHA_PARENT, ABRE_COLCH, FECHA_COLCH, ABRE_CHAVE, FECHA_CHAVE, KW_IF, KW_ELSE, KW_WHILE, KW_DO, KW_MAIN;
+terminal String OP_RELACIONAL,OP_LOGICO;
+terminal String NUMBER;
+
+/* NÃO TERMINAIS */
+non terminal expr_list, expr_ptv, if, else, condicao, block, condition_block,while,do,logical_block,stmt,main;
+non terminal expr, term, factor, designator;
+
+main ::= KW_MAIN ABRE_PARENT FECHA_PARENT stmt;
+
+
+stmt ::=  if | while | do | expr_list | block;
+
+block ::= ABRE_CHAVE{::}
+    stmt
+  FECHA_CHAVE ;
+
+
+if ::= 
+  KW_IF condition_block block else
+  | error {: 
+    parser.defineError("Erro na construção do IF");
+  :};
+
+else ::= KW_ELSE block | /*vazio */;
+
+while ::= KW_WHILE condition_block block;
+do ::= KW_DO block KW_WHILE condition_block PTVIRG;
+
+
+condition_block ::= ABRE_PARENT logical_block FECHA_PARENT ;
+
+logical_block ::= condicao | condicao OP_LOGICO logical_block ;
+
+condicao ::= expr:ex1 OP_RELACIONAL:op expr:ex2 {:
+  String operacao = op.toString();
+  switch(operacao){
+    case "<":
+      RESULT = Double.parseDouble((String)ex1) < Double.parseDouble((String)ex2);
+      break;
+    case ">":
+      RESULT = Double.parseDouble((String)ex1) > Double.parseDouble((String)ex2);
+      break;
+    case "<=":
+      RESULT = Double.parseDouble((String)ex1) <= Double.parseDouble((String)ex2);
+      break;
+    case ">=":
+      RESULT = Double.parseDouble((String)ex1) >= Double.parseDouble((String)ex2);
+      break;
+    case "==":
+      RESULT = Double.parseDouble((String)ex1) == Double.parseDouble((String)ex2);
+      break;
+    case "!=":
+      RESULT = Double.parseDouble((String)ex1) != Double.parseDouble((String)ex2);
+      break;
+  }
+:} | term | error {: 
+    parser.defineError("Erro na construção da condição");
+  :}  ;
+
+expr_list ::= expr_list expr_ptv | expr_ptv ;
+
+expr_ptv ::= expr:e {: 
+  RESULT = e; 
+  :} PTVIRG;
+
+expr ::= expr:e MAIS term:t {:
+    RESULT = Double.parseDouble((String)e) + Double.parseDouble((String)t); 
+  :} | expr:e MENOS term:t {:
+    RESULT = Double.parseDouble((String)e) - Double.parseDouble((String)t);
+  :} | MENOS term:t {:
+    RESULT = -1 * Double.parseDouble((String)t);
+  :}
+  | designator:key EQUAL term
+  | term:t {:
+    RESULT = t;
+  :};
+
+term ::= factor:f MULT term:t {: 
+    RESULT = Double.parseDouble((String)f) * Double.parseDouble((String)t);  
+  :} | factor:f DIV term:t {:
+    Object denominador = t;
+    if(Double.parseDouble((String)denominador) == 0){
+      parser.defineError(tleft,tright,"Divisão por zero");
+    }
+    RESULT = Double.parseDouble((String)f) / Double.parseDouble((String)denominador);  
+  :}| factor:f MOD term:t {:
+    Integer denominador = Integer.parseInt(t.toString().split("\\.")[0]);
+    
+    if(denominador.getClass()==Integer.class){
+      RESULT = Double.parseDouble((String)f) / (int)denominador;
+    }
+  :} | factor:f {:
+    RESULT = f;
+  :}
+  ;
+
+factor ::= NUMBER:n {: 
+    RESULT = n;
+  :} | ABRE_PARENT expr:e FECHA_PARENT {:
+    RESULT = e;
+  :} | designator:d {:
+    parser.inDesig = true;
+    RESULT = d;
+  :};
+
+designator ::= designator ABRE_COLCH expr:e FECHA_COLCH {:
+    RESULT = e;
+  :} | designator:e PTO IDENT:id {:
+    String key = e.toString() + "." + id.toString();
+    Object s = key;
+    RESULT = s;
+  :} | IDENT:id {:
+      RESULT = id;
+  :};
