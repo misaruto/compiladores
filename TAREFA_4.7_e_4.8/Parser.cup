@@ -121,7 +121,8 @@ term ::= factor:f MULT term:t {:
   :}
   ;
 
-factor ::= NUMBER:n {: 
+factor ::= NUMBER:n {:
+    System.out.println("NUMBER: " + n);
     RESULT = n;
   :} | ABRE_PARENT expr:e FECHA_PARENT {:
     RESULT = e;

@@ -49,8 +49,11 @@ expr_ptv ::= expr:e {:
   :} PTVIRG;
 
 expr ::= expr:e MAIS term:t {:
+System.out.println("e: " + e);
     RESULT = (double)e + (double)t; 
   :} | expr:e MENOS term:t {:
+    System.out.println("e: " + e);
+    System.out.println("t: " + t);
     RESULT = (double)e - (double)t;
   :} | MENOS term:t {:
     RESULT = -1 * (double)t;
@@ -86,6 +89,7 @@ term ::= factor:f MULT term:t {:
   :};
 
 factor ::= NUMBER:n {: 
+  System.out.println("NUMBER: " + n);
     RESULT = n;
   :} | ABRE_PARENT expr:e FECHA_PARENT {:
     RESULT = e;

@@ -25,6 +25,7 @@ espaco = {fimdeLinha} | [ \t\f]
 %%
 
 {digitos} { 
+  System.out.println("numbewr "+yytext());
   double aux = Double.parseDouble(yytext());
   return new Symbol(sym.NUMBER, new Double(aux)); 
 }
@@ -35,7 +36,7 @@ espaco = {fimdeLinha} | [ \t\f]
 
 "=" { return new Symbol(sym.EQUAL);}
 "+" { return new Symbol(sym.MAIS);}
-"-" { return new Symbol(sym.MENOS);}
+"-" { System.out.println("MENOS"); return new Symbol(sym.MENOS);}
 "/" { return new Symbol(sym.DIV);}
 "*" { return new Symbol(sym.MULT);}
 "%" { return new Symbol(sym.MOD);}

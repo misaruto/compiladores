@@ -51,7 +51,7 @@ espaco = {fimdeLinha} | [\t\f] | \s | " "
 
 %%
 
-{digitos} { return this.createSymbol(sym.NUMBER,yytext()); }
+{digitos} {System.out.println("numbewr "+yytext()); return this.createSymbol(sym.NUMBER,yytext()); }
 
 "main" { return this.createSymbol(sym.KW_MAIN);}
 
@@ -66,7 +66,7 @@ espaco = {fimdeLinha} | [\t\f] | \s | " "
 {ident} { return this.createSymbol(sym.IDENT, yytext());}
 "=" { return this.createSymbol(sym.EQUAL);}
 "+" { return this.createSymbol(sym.MAIS);}
-"-" { return this.createSymbol(sym.MENOS);}
+"-" {  System.out.println("MENOS"); return this.createSymbol(sym.MENOS);}
 "/" { return this.createSymbol(sym.DIV);}
 "*" { return this.createSymbol(sym.MULT);}
 "%" { return this.createSymbol(sym.MOD);}
